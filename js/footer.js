@@ -12,6 +12,11 @@ s.innerHTML =
 	--lifecards-night-faded: rgb(30,40,50);	
 }
 
+lifecards-footer {
+	width: 100%;
+	text-align: center;
+}
+
 lifecards-footer, lifecards-footer a, lifecards-footer lifecards-link {
 	color: var(--lifecards-day-faded);
 }

@@ -28,43 +28,66 @@ export default class Routable extends HTMLElement {
 
 		let path = e.uuid
 		if(!path) {
+			console.error("routable: has no path")
 			return
 		}
+
+		if(!this.db) {
+			console.error("routable: has no db")
+			return
+		}
+
+		// richer routing mechanics tbd
+		// for(let entries in Object.entries(this.routes)) {			
+		// }
+
+		// hacks
 		if(path == "/lifecards/") path = "/" // HACK
+		if(path == "/makerlab/") path = "/" // HACK
 		if(path == "/") {
 			path = this.default
 		}
 
-		if(!this.db) {
-			console.error("routable has no db")
-			return
-		}
+		// helper function to set new page contents
+		let switcher = (blob) => {
 
-		this.db.resolve({command:"query",data:{uuid:path,observer:async (results)=>{
-			if(!results || !results.length) return
-			let blob = results[0]
-
-			// detach children
+			// detach any children
 			this.innerHTML = ""
 
 			// stuff database into blob to be helpful
 			blob.db = this.db
 
+			// already built?
 			if(!this._routable_elements) this._routable_elements={}
-
 			let elem = this._routable_elements[blob.uuid]
 			if(elem) {
 				this.appendChild(elem)
 				if(elem.resolve) elem.resolve(blob)
-			} else {
-				let elem = await factory(blob)
-				if(elem) {
-					this.appendChild(elem)
-					this._routable_elements[blob.uuid]=elem
-				}
 			}
+			// attempt to make component
+			else {
+				factory(blob).then(elem=>{
+					if(!elem) {
+						console.error("routable: cannot make page")
+						console.error(blob)
+					} else {
+						this.appendChild(elem)
+						this._routable_elements[blob.uuid]=elem
+					}
+				})
+			}
+		}
 
-		}}})
+		// helper to watch for database changes
+		let observer = async (results) => {
+			if(!results || !results.length) {
+				return;
+			} else {
+				switcher(results[0])
+			}
+		}
+
+		this.db.resolve({command:"query",data:{uuid:path,observer}});
 	}
 }
 

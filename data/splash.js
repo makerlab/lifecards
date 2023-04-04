@@ -5,10 +5,6 @@ let splash = [{
 
 uuid: "/lifecards.org/splash",
 stylize:{ maxWidth:"800px" },
-
-children: [
-
-{
 markdown:`
 
 # Lifecards: Data Driven Presentation Tool
@@ -29,9 +25,6 @@ Our source code is on github at: <a href="https://github.com/makerlab/lifecards"
 
 Join us on Discord at: <a href="https://discord.gg/ejjQnQEBgy">discord/makerlab</a>
 `
-}
-]
-
 }]
 
 export default splash
