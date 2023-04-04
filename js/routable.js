@@ -1,7 +1,7 @@
 
 import Router from '../utils/router.js'
 
-import factory from './_factory.js'
+import factory from './factory.js'
 
 let router = new Router()
 

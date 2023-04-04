@@ -1,5 +1,5 @@
 
-import factory from './_factory.js'
+import factory from './factory.js'
 
 ///
 /// A public interface to help bootstrap the custom dom system
