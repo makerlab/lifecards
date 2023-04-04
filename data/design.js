@@ -13,7 +13,7 @@ Lifecards is a data driven information presentation tool.
 ## Who is Lifecards for?
 
 It feels like our basic needs to organize and share information are not being well met online.
-By 'our' what is meant is arange of people from individuals hosting websites or sharing content to small business owners.
+By 'our' what is meant is a range of people from individuals hosting websites or sharing content to small business owners.
 There are kinds of things that we want to organize and even occasionally share that seem unduly hard to achieve.
 
 If you're like us at all then:
