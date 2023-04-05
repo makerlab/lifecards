@@ -160,11 +160,6 @@ To start, modify the content in /data/data.js. Lifecards is data driven and all 
 
 The index.html file demonstrates how to bootstrap lifecards. You can also do this yourself and embed the project in other tools. Bootstrapping requires first making a DB() database and then making a DOM() layout manager. The DOM() layout manager is driven by telling it what to make. Many of the dom nodes are able to query the database to fetch and produce yet other nodes and to thus produce the display.
 
-	import DB from "/utils/db.js"
-	import DOM from "/js/dom.js"
-	let db = new DB({command:"load",url:"/data/data.js"})
-	let dom = new DOM({uuid:"/",query:"*",db})
-
 ## Node structure
 
 Lifecards consumes a directed acyclic graph of "nodes" that are specified in the database. A node is really just a json blob with some conventions about what is in it. Typically a database is actually just a file system or an unstructured datastore such as mongodb or firebase.
@@ -182,7 +177,7 @@ Typical nodes look like this:
 		kind:"area",
 		thumb:"/assets/.thumb.bird.jpg"
 		content:"Best Comics Ever",
-		children: [ { content:"Please contact me if you have more comics"} ],
+		children: [ { content:"Comics!"} ],
 		stylize:{
 			width:"320px",
 			border:"3px solid blue"

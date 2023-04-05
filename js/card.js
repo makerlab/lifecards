@@ -22,7 +22,7 @@ export default class Card extends HTMLElement {
 
 		let label = blob.uuid.split("/").slice(-1) + "";
 		label = label.charAt(0).toUpperCase()+label.slice(1)
-		let href = blob.link || blob.uuid || ""
+		let href = blob.href || blob.link || blob.uuid || "#"
 		let text = blob.text || blob.content || ""
 		let sponsor = blob.sponsor || ""
 		let art = this.art
@@ -37,7 +37,7 @@ export default class Card extends HTMLElement {
 		this.innerHTML =
 			`
 			<lifecards-top>
-				<a href="${blob.href}"><img src='${art}'></img></a>
+				<a href="${href}"><img src='${art}'></img></a>
 				<tags>${tags}</tags>
 			</lifecards-top>
 			<label>${label}</label>
