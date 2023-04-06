@@ -42,8 +42,8 @@ export default class Routable extends HTMLElement {
 		// }
 
 		// hacks
-		if(path == "/lifecards/") path = "/" // HACK
-		if(path == "/makerlab/") path = "/" // HACK
+		//if(path == "/lifecards/") path = "/" // HACK
+		//if(path == "/makerlab/") path = "/" // HACK
 		if(path == "/") {
 			path = this.default
 		}

@@ -3,7 +3,7 @@
 
 let splash = [{
 
-uuid: "/lifecards.org/splash",
+uuid: "/splash",
 stylize:{ maxWidth:"800px" },
 markdown:`
 
@@ -12,12 +12,18 @@ markdown:`
 ## Data driven
 
 Lifecards is a data driven CMS where the layout is defined in the database.
-The intent is to help manage larger volumes of data more easily.
+
+It's intended to help reduce labor for people who have a lot of content to manage.
+
+- It is a bit like React in that it can do layout, has widgets, a router and opinions.
+- It is a bit like Wordpress in that it also has an idea of managing data woven into it.
+- It is a bit like Figma or even Obsidian in that the goal is help show information in pretty ways.
+- It is a bit like Pinterest in that card like layouts are a core motif.
 
 ## Use Cases
 
 Lifecards can present personal content, websites, blogs, photo albums or in other kinds of data heavy use cases.
-There are widgets for many presentational styles from card layouts to timelines to maps and globes.
+There will be widgets for many presentational styles from card layouts to timelines to maps and globes.
 
 ## Community
 

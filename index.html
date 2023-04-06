@@ -8,8 +8,20 @@
 <body></body>
 </html>
 <script type="module">
+
+// bring in a database service
 import DB from "./utils/db.js"
+
+// bring in a dom abstraction helper
 import DOM from "./js/dom.js"
-let db = new DB({command:"load",url:"../data/data.js"})
-let dom = new DOM({uuid:"/",query:"*",db})
+
+// fetch our data by hand because i want access to the root object right now
+import data from "./.lifecards.js"
+
+// start up database - pass it our root data by hand even though it scans for .lifecards
+let db = data[0].db = new DB(data)
+
+// kickstart the dom with the specific root node we want
+let dom = new DOM(data[0])
+
 </script>

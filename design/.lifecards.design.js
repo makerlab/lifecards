@@ -1,7 +1,6 @@
 let design = [{
-uuid: "/lifecards.org/design",
+uuid: "/design",
 stylize:{maxWidth:"800px"},
-art:"/assets/bird.jpg",
 markdown:`
 # General
 ---
