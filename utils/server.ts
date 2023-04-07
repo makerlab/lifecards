@@ -25,34 +25,31 @@ async function handleHttp(conn: Deno.Conn) {
 
     let filepath = decodeURIComponent(url.pathname);
 
+    // get mimetype
+    let mimetype = filepath.match(/\.[0-9a-z]+$/i)
+
+    // get stats if any
+    let fileInfo = await Deno.stat("."+filepath);
+
+    // SPA support - any folder like thing always returns the index
+    if(!mimetype || (fileInfo && fileInfo.isFile==false)) {
+      filepath = "/index.html"
+      fileInfo = await Deno.stat("."+filepath);
+    }
+
+    // found the file? disallow folders in general again
+    if (!fileInfo || !fileInfo.isFile) {
+      const notFoundResponse = new Response("404 Not Found", { status: 404 });
+      await requestEvent.respondWith(notFoundResponse);
+      return;
+    }
+
     // Try opening the file as a stream
     let file = 0;
     try {
       file = await Deno.open("." + filepath, { read: true });
     } catch {
       console.log("not found " + filepath)
-      //const notFoundResponse = new Response("404 Not Found", { status: 404 });
-      //await requestEvent.respondWith(notFoundResponse);
-      //return;
-    }
-
-    // Try open home doc instead
-    if(file == 0) {
-      filepath = "/index.html"
-      console.log(filepath)
-      try {
-        file = await Deno.open("."+ filepath, { read: true });
-      } catch {
-        console.log("not found again " + filepath)
-        const notFoundResponse = new Response("404 Not Found", { status: 404 });
-        await requestEvent.respondWith(notFoundResponse);
-        return;
-      }
-    }
-
-    // get stats? do not allow opening folders
-    const fileInfo = await Deno.stat("."+filepath);
-    if (!fileInfo || !fileInfo.isFile) {
       const notFoundResponse = new Response("404 Not Found", { status: 404 });
       await requestEvent.respondWith(notFoundResponse);
       return;
