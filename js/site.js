@@ -34,6 +34,7 @@ body {
 }
 
 h1,h2,h3 {
+	width: 100%;
 	color: var(--lifecards-day-h);
 	font-family: Helvetica, sans-serif;
 }

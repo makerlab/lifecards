@@ -12,7 +12,7 @@ export default class Area extends HTMLElement {
 	resolve(blob) {
 
 		// remember children kind to manufacture
-		this.kindchildren = blob.kindchildren || "card"
+		this.kindchildren = blob.kindchildren
 
 		// remember db
 		if(!this._db && blob.db) {
@@ -71,8 +71,16 @@ export default class Area extends HTMLElement {
 			// stuff our copy of the database into the child if any
 			blob.db = this._db
 
-			// override child style if desired
-			if(this.kindchildren && this.kindchildren.length) {
+
+			// override child style if area doesn't permit it explicitly
+			if(!this.kindchildren || this.kindchildren.length < 1) {
+				blob.kind = "card"
+			}
+			// or permit if explicitly permitted
+			else if(this.kindchildren == "*") {
+			}
+			// or apply style
+			else {
 				blob.kind = this.kindchildren
 			}
 
@@ -101,4 +109,19 @@ export default class Area extends HTMLElement {
 }
 
 customElements.define('lifecards-area', Area )
+
+var s = document.createElement('style');
+s.innerHTML =
+`
+lifecards-area {
+	display: flex;
+	width: 100%;
+	max-width:1200px;
+	justify-content:center;
+	flex-wrap:wrap
+}
+`
+document.head.appendChild(s)
+
+
 

@@ -41,7 +41,7 @@ let footer = {
 	content:"Thanks for visiting!"
 }
 
-let list_of_items_for_database_to_start_with = [{
+let site = {
 	uuid:"/",
 	kind:"site",
 	children:[
@@ -50,6 +50,10 @@ let list_of_items_for_database_to_start_with = [{
 		{ kind:"routable", default:"/splash" },
 		footer
 	],
-}]
+}
+
+let list_of_items_for_database_to_start_with = [
+	site
+]
 
 export default list_of_items_for_database_to_start_with;
