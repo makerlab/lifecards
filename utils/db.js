@@ -391,7 +391,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 			console.log("db: loading raw url = " + path)
 		} else {
 			// for folders look for a specific hint file
-			path = `${url}/.lifecards.${leaf}.js`
+			path = `${url}/.${leaf}.lifecards.js`
 			console.log("db: loading implicit hints from = " + path)
 		}
 
