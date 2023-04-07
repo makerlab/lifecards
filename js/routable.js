@@ -92,3 +92,25 @@ export default class Routable extends HTMLElement {
 }
 
 customElements.define('lifecards-routable', Routable )
+
+
+
+
+var s = document.createElement('style');
+s.innerHTML =
+`
+lifecards-routable {
+	display: flex;
+	width: 100%;
+	justify-content: center;
+}
+`
+document.head.appendChild(s);
+
+
+
+
+
+
+
+

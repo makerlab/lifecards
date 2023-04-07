@@ -358,13 +358,12 @@ export default class DatabaseFS { // extends AbstractDatabase
 		console.log("db: considering a request to load something at = " + url)
 
 		//
-		// ignore routes already in db for now
+		// todo evaluate
 		//
-
-		if(this._uuids[url]) {
-			console.log("db: ignoring duplicate request to load uuid = " + url)
-			return
-		}
+		//if(this._uuids[url]) {
+		//	console.log("db: ignoring duplicate request to load uuid = " + url)
+		//	return
+		//}
 
 		//
 		// for now only scan a given file once later may do so on a timer based rotation
@@ -413,14 +412,26 @@ export default class DatabaseFS { // extends AbstractDatabase
 			}				
 		}
 
-
 		try {
 			let promise = import(path).then(promise_finalize)
 			this._promises.push(promise)
 		} catch(e) {
-			console.warn("DB: did not find metadata for requested path " + url)
+			console.warn("DB: promise failure (probably not critical) - did not find metadata for requested path " + url)
+			console.warn(e)
 		}
 
+	}
+
+	async _finalize_promises() {
+		while(this._promises.length) {
+			try {
+				let promise = this._promises.shift()
+				await(promise)
+			} catch(err) {
+				console.warn("DB: promise failure (probably not critical)")
+				console.warn(err)
+			}
+		}
 	}
 
 	//
@@ -441,9 +452,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 		}
 
 		// make sure any existing work is complete (especially filesystem loads)
-		while(this._promises.length) {
-			await this._promises.shift()
-		}
+		await this._finalize_promises()
 
 		// must have observer to return results
 		if(!args.observer) {
@@ -530,6 +539,8 @@ export default class DatabaseFS { // extends AbstractDatabase
 		//
 		// return current round of results
 		// [later] keep returning changes to the query result candidates over time
+		//
+		// todo note that at the moment it returns empty sets also... do we want to do that?
 		//
 
 		args.observer(results)

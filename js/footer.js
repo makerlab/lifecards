@@ -9,10 +9,11 @@ s.innerHTML =
 `
 :root {
 	--lifecards-day-faded: rgb(210,210,210);
-	--lifecards-night-faded: rgb(30,40,50);	
+	--lifecards-night-faded: rgb(60,70,80);	
 }
 
 lifecards-footer {
+	padding-top: 10px;
 	width: 100%;
 	text-align: center;
 }

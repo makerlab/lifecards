@@ -1,24 +1,31 @@
 
 # chores march 2023
 
-	- styleize area by default
+	- css piano idea needs to be formalized as a separate concept
 
-			stylize: {
-			display: 'flex',
-			width: '100%',
-			maxWidth:"1200px",
-			justifyContent:"center",
-			flexWrap:"wrap",
-		},
+	- css
+		- already concerned about style bleed through from various components
+		  for example routable is set to be a flex box
+		  and so is site
+		  i really want more like a mixin approach that has defaults
+		  needs an audit
 
-		also maybe expose the power to base again?
+	- database dynamic fetch examine closer
 
-	- dom
-		- the dom constructor could be dis-intermediated a notch; no reason to have a DOM constructor just use Base
-		- actually make tag clicking do something useful like show a page with things matching that tag
-		- better factory fetch dom components dynamically and allow userland components and remote url components
+		- because areas are not fetched until visited summaries don't always work
+		- authors are required to preload or prehint at things they want to exist
+		- is that ok? are there cases where it breaks badly?
 
+	- if i'm going to do a piano thing then do it on purpose; make it a mode
 
-	- db
-	 - too forceful to fully qualify children - can figure out from path on load
-	 - load md files on the fly
+	- area is the only thing that has database children; should that be exposed to base?
+
+	- the dom constructor could be dis-intermediated a notch; no reason to have a DOM constructor just use Base
+
+	- actually make tag clicking do something useful like show a page with things matching that tag
+
+	- better factory fetch dom components dynamically and allow userland components and remote url components
+
+	- db dynamic load; don't require children paths to be fully specified
+
+	- load md files on the fly

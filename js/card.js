@@ -8,24 +8,18 @@
 ///
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let counter = 0
+let counter = 100
 
 export default class Card extends HTMLElement {
 
 	resolve(blob) {
-
-		if(!this.art) {
-			counter++
-			this.art = `https://source.unsplash.com/random/${counter}`
-		}
-
 
 		let label = blob.uuid.split("/").slice(-1) + "";
 		label = label.charAt(0).toUpperCase()+label.slice(1)
 		let href = blob.href || blob.link || blob.uuid || "#"
 		let text = blob.text || blob.content || ""
 		let sponsor = blob.sponsor || ""
-		let art = this.art
+		let art = blob.art || `https://source.unsplash.com/random/${counter++}`
 
 		let tags = ""
 		if(blob.tags) {
@@ -108,7 +102,7 @@ lifecards-card:hover {
 
 @media (max-width: 1200px) {
 	lifecards-card {
-		width: 400px;
+		width: 320px;
 	}
 }
 
