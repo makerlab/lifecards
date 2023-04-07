@@ -15,6 +15,11 @@ import factory from "./factory.js"
 export default class Base extends HTMLElement {
 	async resolve(blob) {
 
+		// cache and hold a back pointer to db if seen
+		if(!this._db && blob.db) {
+			this._db = blob.db
+		}
+
 		// if no data then flush all and return
 		if(!blob) {
 			this.replaceChildren()
@@ -57,7 +62,7 @@ export default class Base extends HTMLElement {
 			this.innerHTML = blob.content
 		}
 
-		// associate htmlelement id even though it is not legal
+		// associate htmlelement id even though symbols i use are not legal according to html spec
 		this.id = blob.uuid || 0
 
 		// update immediate children if any - after text
@@ -65,15 +70,21 @@ export default class Base extends HTMLElement {
 			if(!this._children_elements) this._children_elements = {}
 			let id = 1
 			for(let blob2 of blob.children) {
-				// stuff the database into the child
-				blob2.db = blob.db
+				// stuff the database into the child if we have it
+				blob2.db = this._db
+
 				// force uuid - todo could perhaps allow a local id?
 				blob2.uuid = blob.uuid + "/v"+id++
 				let elem = this._children_elements[blob2.uuid]
+
+				// for existing elements just update them (if they have that ability)
 				if(elem) {
 					if(elem.resolve) elem.resolve(blob2)
-				} else {
-					blob2.db = blob.db
+				}
+
+				// otherwise manufacture them whole cloth and append always
+				else {
+					blob2.db = this._db
 					let elem = await factory(blob2)
 					if(elem) {
 						this.appendChild(elem)
@@ -84,70 +95,6 @@ export default class Base extends HTMLElement {
 					}
 				}
 			}
-		}
-
-		// update database children if any
-		if(blob.db && blob.uuid && blob.query) {
-
-			// build a persistent query to track pagination and so on
-			let query = this._children_query
-			if(!query) {
-				query = this._children_query = {
-					offset:0,
-					limit:999,
-					handle:blob.uuid,
-					observer:0
-				}
-			}
-
-			// special case convenience notation - find children
-			if(blob.query=="*" || blob.query=="") {
-				query.parent = blob.uuid
-			}
-
-			// reject other queries that look wrong
-			else if (typeof blob.query !== 'object' || Array.isArray(blob.query)) {
-				return
-			}
-
-			// merge query args for custom queries
-			else {
-				Object.assign(query,blob.query)
-			}
-
-			// query result helper
-			query.observer = async (results) => {
-				if(!this._database_elements) this._database_elements = {}
-				if(!Array.isArray(results)) results = [results]
-				for(let blob2 of results) {
-
-					// stuff the database into the child
-					blob2.db = blob.db
-
-					// override child style if desired
-					if(blob.queryrender) {
-						blob2.kind = blob.queryrender
-					}
-
-					// find child
-					let elem = this._database_elements[blob2.uuid]
-					if(elem) {
-						if(elem.resolve) elem.resolve(blob2)
-					} else {
-						elem = await factory(blob2)
-						if(elem) {
-							this.appendChild(elem)
-							this._database_elements[blob2.uuid]=elem
-						} else {
-							console.error("Base: could not build datbase child")
-							console.error(blob2)
-						}
-					}
-				}
-			}
-
-			// do query
-			blob.db.resolve({command:"query",data:query})
 		}
 	}
 

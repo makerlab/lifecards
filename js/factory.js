@@ -1,6 +1,6 @@
 
+import area from "./area.js"
 import base from "./base.js"
-import area from "./base.js"
 import card from "./card.js"
 import link from "./link.js"
 import site from "./site.js"
@@ -10,6 +10,7 @@ import footer from "./footer.js"
 import routable from "./routable.js"
 
 let classes = {
+	area,
 	base,
 	area,
 	card,

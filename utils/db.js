@@ -76,11 +76,13 @@ export default class DatabaseFS { // extends AbstractDatabase
 		this._filesystem = {}
 		this._promises = []
 
-		// always try to load a hints file
-		this._load("/.lifecards.js")
-
-		// resolve any supplied messages
-		this.resolve(message)
+		// load a hints file if nothing supplied
+		if(!message) {
+			this._load("/.lifecards.js")
+		} else {
+			// resolve any supplied messages
+			this.resolve(message)
+		}
 	}
 
 	///
@@ -191,6 +193,8 @@ export default class DatabaseFS { // extends AbstractDatabase
 			return
 		}
 
+		console.log("db::write writing " + blob.uuid)
+
 		//
 		// look and see if is this a new object or a change to an existing object?
 		//
@@ -211,7 +215,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 		//
 
 		else if(prev) {
-			//console.warn("DB: warning appending to uuid = " + blob.uuid)
+			console.warn("DB: warning appending to uuid = " + blob.uuid)
 			Object.assign(blob,prev)
 		}
 
@@ -351,13 +355,14 @@ export default class DatabaseFS { // extends AbstractDatabase
 
 	_load(url) {
 
-		//console.log("db: load " + url)
+		console.log("db: considering a request to load something at = " + url)
 
 		//
 		// ignore routes already in db for now
 		//
 
 		if(this._uuids[url]) {
+			console.log("db: ignoring duplicate request to load uuid = " + url)
 			return
 		}
 
@@ -366,7 +371,10 @@ export default class DatabaseFS { // extends AbstractDatabase
 		//
 
 		let scanned = this._filesystem[url]
-		if(scanned) return
+		if(scanned) {
+			console.log("db: ignoring duplicate request to load path = " + url)
+			return
+		}
 		this._filesystem[url] = Date.now()
 
 		//
@@ -374,36 +382,45 @@ export default class DatabaseFS { // extends AbstractDatabase
 		// for now only support import
 		//
 
+		let parts = url.split("/")
+		let leaf = parts[parts.length-1]
+		let path
+		if(leaf.includes(".")) {
+			// dunno what to do so just accept as is
+			path = url
+			console.log("db: loading raw url = " + path)
+		} else {
+			// for folders look for a specific hint file
+			path = `${url}/.lifecards.${leaf}.js`
+			console.log("db: loading implicit hints from = " + path)
+		}
+
+		// not supported - load json and parse
+		// const response = await fetch(path)
+		// const json = await response.json()
+
+		//
+		// import real ".js" javascript files
+		// disallow crashes
+		// build a promise to attempt to fetch item
+		// returns prior to completing promise
+		//
+
+		let promise_finalize = (module) => {
+			for(let child of module.default) {
+				console.log("db: loaded item " + child.uuid)
+				this._write(child)
+			}				
+		}
+
+
 		try {
-			let parts = url.split("/")
-			let leaf = parts[parts.length-1]
-			let path
-			if(leaf.includes(".")) {
-				// dunno what to do so just accept as is
-				path = url
-			} else {
-				// for folders look for a specific hint file
-				path = `${url}/.lifecards.${leaf}.js`
-			}
-
-			// not supported
-			// const response = await fetch(path)
-			// const json = await response.json()
-
-			// results are handled in a promise because they can backlog the rest of the system
-			let promise_finalize = (module) => {
-				for(let child of module.default) {
-					this._write(child)
-				}				
-			}
-
-			// build a promise and save it and return now prior to resolving it
 			let promise = import(path).then(promise_finalize)
 			this._promises.push(promise)
-
 		} catch(e) {
-			console.warn("DB: did not find metadata for " + url)
+			console.warn("DB: did not find metadata for requested path " + url)
 		}
+
 	}
 
 	//
