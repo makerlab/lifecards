@@ -30,10 +30,10 @@ export default class Card extends HTMLElement {
 
 		this.innerHTML =
 			`
-			<lifecards-top>
+			<lifecards-banner>
 				<a href="${href}"><img src='${art}'></img></a>
 				<tags>${tags}</tags>
-			</lifecards-top>
+			</lifecards-banner>
 			<label>${label}</label>
 			<phrase>${text}</phrase>
 			`
@@ -70,48 +70,50 @@ customElements.define('lifecards-card', Card ) //, { extends: "a" } )
 var s = document.createElement('style');
 s.innerHTML =
 `
+/*
+ * wrap the entire card in a few effects
+ * do limit the max size of cards to stop bad run on labels and text
+ */
+
 lifecards-card {
-
-	position:relative;
-
-	width: 64px;
-	padding: 0;
+	display:block;
+	max-width:300px;
 	margin: 0.3%;
-
 	border-radius: 5px;
 	overflow: hidden;
 	transition: all .20s linear;
 	box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 	background-color: rgb(244,246,250);
 	color: rgb(15,23,42)
-
-	xbackground-size: cover;
-	xbackground-repeat: no-repeat;
-	xbackground-position: center center;
 }
 
 lifecards-card:hover {
 	transform: scale(1.05);
 }
 
-@media (prefers-color-scheme: dark) {
-	lifecards-card {
-		box-shadow: none;
-	}
+/*
+ * banner area contains the link and the image
+ * main chore it has is that it floats some tags; so use relative
+ * could use a backdrop instead of an image arguably but the sizing of the image is useful
+ *	xbackground-size: cover;
+ *	xbackground-repeat: no-repeat;
+ *	xbackground-position: center center;
+ */
+
+lifecards-banner {
+	display: block;
+	position: relative;
 }
 
-@media (max-width: 1200px) {
-	lifecards-card {
-		width: 320px;
-	}
-}
+/*
+ * images can be variable size; i do force a height
+ * aspect-ratio can be set to force all to be the same width/height
+ */
 
 lifecards-card img {
 	width:100%;
 	height:200px;
-	padding: 0;
-	margin: 0;
-	xaspect-ratio: 3/2;
+	xaspect-ratio: 2/3;
 	object-position: center;
 	object-fit: cover;
 	object-cover: cover;
@@ -119,8 +121,9 @@ lifecards-card img {
 }
 
 lifecards-card label {
-	font-size: 1.05em;
 	display:block;
+	max-height: 20px;
+	font-size: 1.05em;
 	letter-spacing: 0.1rem;
 	margin: 8px 0 0 8px;
 	color: rgb(23,50,70)
@@ -128,17 +131,14 @@ lifecards-card label {
 
 lifecards-card phrase {
 	display:block;
+	max-height: 20px;
+	overflow: none;
 	margin: 0 0 8px 8px;
 	padding: 8px 0 8px 0;
 	color: rgb(120,120,150)
 }
 
 lifecards-card a {
-	display: block;
-	position: relative;
-}
-
-lifecards-top {
 	display: block;
 	position: relative;
 }
@@ -150,17 +150,32 @@ lifecards-card tags {
 	right: 10px;
 	bottom: 10px;
 	z-index: 100;
-
 }
 
 lifecards-card tag {
 	display: block;
 	padding: 5px;
 	margin: 5px;
+	max-height: 20px;
 	background-color: rgba(150,200,230,0.5);
 	color: rgb(240,250,255);
 	border-radius: 3px;
 }
+
+@media (prefers-color-scheme: dark) {
+	lifecards-card {
+		box-shadow: none;
+	}
+}
+
+/* fun piano effect for now - may remove 
+@media (min-width: 1200px) {
+	lifecards-card {
+		width: 64px;
+	}
+}
+*/
+
 `
 
 document.head.appendChild(s);

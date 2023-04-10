@@ -1,6 +1,6 @@
 let usage = [{
 uuid: "/usage",
-stylize:{maxWidth:"800px"},
+stylize:{ maxWidth:"800px",margin:"auto" },
 markdown:`
 
 # Getting Started

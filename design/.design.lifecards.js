@@ -1,6 +1,6 @@
 let design = [{
 uuid: "/design",
-stylize:{maxWidth:"800px"},
+stylize:{maxWidth:"800px",margin:"auto"},
 markdown:`
 # General
 ---

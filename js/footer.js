@@ -13,6 +13,7 @@ s.innerHTML =
 }
 
 lifecards-footer {
+	display: block;
 	padding-top: 10px;
 	width: 100%;
 	text-align: center;

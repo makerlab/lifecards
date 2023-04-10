@@ -4,7 +4,7 @@
 let splash = [{
 
 uuid: "/splash",
-stylize:{ maxWidth:"800px" },
+stylize:{ maxWidth:"800px",margin:"auto" },
 markdown:`
 
 # Lifecards: Data Driven Presentation Tool

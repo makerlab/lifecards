@@ -14,11 +14,6 @@ export default class Area extends HTMLElement {
 		// remember children kind to manufacture
 		this.kindchildren = blob.kindchildren
 
-		// remember db
-		if(!this._db && blob.db) {
-			this._db = blob.db
-		}
-
 		// remember uuid
 		if(this._uuid && blob.uuid != this._uuid) {
 			console.error("area: uuid cannot change for now")
@@ -27,7 +22,7 @@ export default class Area extends HTMLElement {
 		this._uuid = blob.uuid
 
 		// won't be able to get much further without these
-		if(!this._db || !this._uuid) {
+		if(!this._uuid) {
 			console.error("Area: needs a db or a uuid")
 			return
 		}
@@ -53,7 +48,9 @@ export default class Area extends HTMLElement {
 		Object.assign(query_and_additional_args,this._durable_query)
 
 		// do query
-		this._db.resolve({command:"query",data:query_and_additional_args})
+		if(window._dom_db_handle) {
+			window._dom_db_handle.resolve({command:"query",data:query_and_additional_args})
+		}
 
 	}
 
@@ -67,10 +64,6 @@ export default class Area extends HTMLElement {
 
 		// visit results
 		for(let blob of results) {
-
-			// stuff our copy of the database into the child if any
-			blob.db = this._db
-
 
 			// override child style if area doesn't permit it explicitly
 			if(!this.kindchildren || this.kindchildren.length < 1) {
@@ -114,14 +107,14 @@ var s = document.createElement('style');
 s.innerHTML =
 `
 lifecards-area {
+	width:100%;
 	display: flex;
-	width: 100%;
-	max-width:1200px;
+	margin: auto;
+	max-width:800px;
 	justify-content:center;
-	flex-wrap:wrap
+	flex-wrap:wrap;
 }
 `
 document.head.appendChild(s)
-
 
 

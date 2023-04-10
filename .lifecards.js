@@ -20,15 +20,17 @@ The database *will* also at least once try to load a hint file from each uuid su
 
 */
 
+// a custom fancy widget for navigation that highlights the current active url
 let nav = {
 	kind: "nav",
 	children: [
 		{ kind:"link", link:"/splash", text:"&nbsp;/&nbsp;" },
 		{ kind:"link", link:"/usage" },
 		{ kind:"link", link:"/design" },
-		]
+	]
 }
 
+// a custom fancy widget that is a logo generator that can produce a variety of logos
 let logo = {
 	kind:"logo",
 	link:"/",
@@ -36,14 +38,15 @@ let logo = {
 	content:"lifecards",
 }
 
+// a custom footer widget that does a few slightly custom details
 let footer = {
 	kind:"footer",
 	content:"Thanks for visiting!"
 }
 
+// overall layout of all elements
 let site = {
 	uuid:"/",
-	kind:"site",
 	children:[
 		logo,
 		nav,

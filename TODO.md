@@ -1,31 +1,40 @@
 
-# chores march 2023
+- hook site
 
-	- css piano idea needs to be formalized as a separate concept
+	- in travel have pictures from tubbataha and anilao
 
-	- css
-		- already concerned about style bleed through from various components
-		  for example routable is set to be a flex box
-		  and so is site
-		  i really want more like a mixin approach that has defaults
-		  needs an audit
+	- in writing make essay work
 
-	- database dynamic fetch examine closer
+	- a home page that has a backdrop image and maybe no large buttons?
 
-		- because areas are not fetched until visited summaries don't always work
-		- authors are required to preload or prehint at things they want to exist
-		- is that ok? are there cases where it breaks badly?
+- database
 
-	- if i'm going to do a piano thing then do it on purpose; make it a mode
+	* now loads md files in a hacky way - can generalize
+	* now loads all the hint path prefix portions as a way to avoid tree gaps
+	* now respects a "loaded" flag to stop running down leafs
+	- it probably would be nice to have an area physically load other things it wants ahead of time
+		(i'm looking for ways to prevent having to express something more than once)
+		(i still currently have some duplicate expressions)
+	- improve generation of child uuids on path loads so that i do not have to fully qualify them
 
-	- area is the only thing that has database children; should that be exposed to base?
+- css issues
 
-	- the dom constructor could be dis-intermediated a notch; no reason to have a DOM constructor just use Base
+	- examine routable centering - currently it is off
+	- examine area centering
+	- also - does an area center cards? such as on makerlab and hook?
+	- hook has two essays that may need content centering
 
-	- actually make tag clicking do something useful like show a page with things matching that tag
+	- remove piano effect or control it better
 
-	- better factory fetch dom components dynamically and allow userland components and remote url components
+		- css piano effect breaks the user experience
+		- 
+		- css piano idea needs to be formalized as a separate concept
+		- small vertical cards need to be generalized as on or off for each site
 
-	- db dynamic load; don't require children paths to be fully specified
+- files on disk; reduce exposed footprint to namespace collisions?
+	- lifecards is a site that uses a kind of resource; a module or service
 
+- general
+	- actually make tag clicking do something useful
+	- better factory fetch dom components dynamically off disk and remote
 	- load md files on the fly

@@ -1,0 +1,67 @@
+:root {
+	--lifecards-day-back: rgb(248,250,252);
+	--lifecards-day-brand: rgb(15,23,42);
+	--lifecards-day-h: rgb(25,23,92);
+	--lifecards-day-text: rgb(10,20,30);
+	--lifecards-day-link: rgb(10,20,120);
+
+	--lifecards-night-back: rgb(15,23,72);
+	--lifecards-night-brand: rgb(248,250,252);
+	--lifecards-night-h: rgb(208,220,252);
+	--lifecards-night-text: rgb(248,250,252);
+	--lifecards-night-link: rgb(200,200,240);
+}
+
+body {
+	background-color: var(--lifecards-day-back);
+	color: var(--lifecards-day-text);
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+h1,h2,h3 {
+	width: 100%;
+	color: var(--lifecards-day-h);
+	font-family: Helvetica, sans-serif;
+}
+
+a {
+	color: var(--lifecards-day-link);
+	text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		background-color: var(--lifecards-night-back);
+		color: var(--lifecards-night-text);
+	}
+	h1,h2,h3 {
+		color: var(--lifecards-night-h);
+	}
+	a {
+		color: var(--lifecards-night-link);
+	}
+}
+
+/*
+
+the defaults are actually ok
+
+{
+	margin: 0;
+	padding:  0;
+	border:  0;
+	box-sizing:  border-box;
+}
+
+no point in enforcing this - i kind of want to do as little preconfig as possible
+
+body > header {
+  position: fixed;
+  top: 0;
+}
+body > footer {
+  position: fixed;
+  bottom: 0;
+}
+
+*/

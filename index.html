@@ -1,8 +1,10 @@
+
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/css/lifecards.css">
 <script src="/utils/marked.min.js"></script>
 </head>
 <body></body>
@@ -15,13 +17,10 @@ import DB from "/utils/db.js"
 // bring in a dom abstraction helper
 import DOM from "/js/dom.js"
 
-// fetch our data by hand because i want access to the root object right now
-import data from "/.lifecards.js"
+// start up database - by default it loads "./lifecards.js"
+let db = new DB()
 
-// start up database - pass it our root data by hand even though it scans for .lifecards
-let db = data[0].db = new DB(data)
-
-// kickstart the dom with the specific root node we want
-let dom = new DOM(data[0])
+// start up the dom - by default it queries the db for top level nodes and paints those
+let dom = new DOM(db)
 
 </script>

@@ -64,25 +64,18 @@ class AbstractDatabase extends AbstractService {
 ///		+ in the file system case make strong attempts to preserve implicit order of content
 ///		+ later needs good scanners to help scan and provide hints at filesystem level
 ///
+///	See _load() for more comments
+///
 
 export default class DatabaseFS { // extends AbstractDatabase
 
-	constructor(message) {
+	constructor() {
 		this._data = []
 		this._uuids = {}
 		this._tags = {}
 		this._counters = {}
 		this._observers = {}
 		this._filesystem = {}
-		this._promises = []
-
-		// load a hints file if nothing supplied
-		if(!message) {
-			this._load("/.lifecards.js")
-		} else {
-			// resolve any supplied messages
-			this.resolve(message)
-		}
 	}
 
 	///
@@ -250,6 +243,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 		// resolve immediate insitu children
 		//
 		// this feature is turned off for now - can revisit later
+		//
 		// the schema i've devised to help people express their files does use an idea of children
 		// but i think for now that the database itself doesn't need to offer that level of convenience
 		// i think it's better if we force users to declare each object as a separate db entry with a named path
@@ -276,37 +270,42 @@ export default class DatabaseFS { // extends AbstractDatabase
 
 	_fixup_uuid(blob) {
 
-		// sanity check
+		// sanity check - if a uuid is present it must be legal - our scheme currently imposes some limits
 		if(blob.uuid && blob.uuid != "/" && (blob.uuid.endsWith("/") || !blob.uuid.startsWith("/"))) {
 			console.error("DB: corrupt - uuid must start with slash and must not end with slash")
 			console.error(blob)
 			return null
 		}
 
-		// sanity check
+		// sanity check - if a parent is present it must be legal - our scheme currently imposes some limits
 		if(blob.parent && blob.parent != "/" && (blob.parent.endsWith("/") || !blob.parent.startsWith("/"))) {
 			console.error("DB: corrupt - parent must start with slash and must not end with slash")
 			console.error(blob)
 			return null
 		}
 
-		// sanity check
+		// sanity check - if an id is present it must be legal - our scheme imposes some limits
 		if(blob.id && blob.id.includes("/")) {
 			console.error("DB: corrupt - id may not have slash")
 			console.error(blob)
 			return null
 		}
 
-		// todo - could actually create uuids for even root nodes using the file path...
+		// a warning
+		if(blob.uuid && blob.id) {
+			console.warn("DB: your id will be blown away by uuid = " + blob.uuid)
+		}
 
-		// sanity check
+		// a blob MUST have a uuid OR a parent
+		// todo - later this could be softened since loaded files have a path hint
+		//			  if this was eased then it would make it much easier for users to move files around
 		if(!blob.uuid && !blob.parent) {
 			console.error("DB: corrupt - no uuid or parent - bad node?")
 			console.error(blob)
 			return null
 		}
 
-		// given uuid recover parent and id
+		// if there is an uuid recover parent and then always override local id
 		if(blob.uuid) {
 			let tokens = blob.uuid.split("/")
 			if(tokens.length > 2) {
@@ -321,105 +320,150 @@ export default class DatabaseFS { // extends AbstractDatabase
 			}
 		}
 
-		// may generate an id and uuid from a parent
-		else if(!blob.id) {
-			let count = this._counters[blob.parent] = (this._counters[blob.parent] || 0 ) + 1
-			blob.id = `n${count}`
-			blob.uuid = build_path(blob.parent,blob.id)
+		// otherwise if there is a local id then regenerate UUID from parent + id
+		else if(blob.id) {
+			blob.uuid = build_path(blob.parent,blob.id)				
 		}
 
-		// may generate a uuid from a given id
-		else {
-			blob.uuid = build_path(blob.parent,blob.id)				
+		// else MUST invent uuid from parent
+		else if(!blob.id && blob.parent) {
+			let count = this._counters[blob.parent] = (this._counters[blob.parent] || 0 ) + 1
+			blob.uuid = build_path(blob.parent,blob.id)
+			blob.id = `n${count}`
+		} else {
+			console.error("DB: this shouldn't be reachable")
+			return null
 		}
 
 		return blob
 	}
 
 	///
-	/// this database is populated by hints that are scattered around the file system
-	/// there is a philosophy of scanning areas once (or periodically i suppose)
-	/// areas are "discovered" by watching the stream of queries that fly past
-	/// the goal is to pre-populate the database with file system data prior to query resolution
+	/// database filesystem mapping principles:
 	///
-	/// various formats may be supported at some point:
+	///		- the high concept is that database maps to the filesystem
+	///		- uuids are supposed to be file system like
+	///		- i do at some point want to support fully qualified urls but for now i'm keeping things simple
 	///
-	///		.js -> currently this is the implict format for folder associated metadata
-	///		.lifecards -> there is some argument for a custom format [not implemented]
-	///		.json -> this is just too weak as a grammar [not supported yet]
-	///		.csv -> i guess arguably other schemes could be supported [not supported yet]
+	///		- as a whole this is test code or a rough cut of a database service
+	///		- in this test example i load resources just in time as paths are presented here
+	///		- in a more final product the database would have all the state ahead of time
+	///		- and a scanner or more sophisticated inhalation process would be used ahead of time
 	///
+	///		- in this rough cut a few strategies are used to resolve requests
+	///		- those paths actually do map to real file systems visible to the server in this version
+	///		- each path can have a hints json file which is in foldername/.foldername.lifecards.js
+	///
+	///		- for a given path such as /a/b/c/d i scan every intermediate path
+	///		- i only scan a path once
+	///		- a loaded asset can seal off further scanning with the flag 'loaded:true'
+	///
+	///		- there are limits to this current approach - and i may have to switch to load everything ahead
+	///		- part of the reason for the current approach is i want to be able to have unpublished folders
+	///
+	/// todo later support https:// urls
 	///
 	/// this routine adds a promise to _promises if it is doing work
 	///
 
-	_load(url) {
+	async _load(path) {
 
-		console.log("db: considering a request to load something at = " + url)
+		console.log("db: considering a request to load something at = " + path)
 
-		//
-		// todo evaluate
-		//
-		//if(this._uuids[url]) {
-		//	console.log("db: ignoring duplicate request to load uuid = " + url)
-		//	return
-		//}
-
-		//
-		// for now only scan a given file once later may do so on a timer based rotation
-		//
-
-		let scanned = this._filesystem[url]
-		if(scanned) {
-			console.log("db: ignoring duplicate request to load path = " + url)
+		// sanity checks
+		if(!path || path[0] != '/') {
+			console.error("db::load path corrupt must start with slash - path = " +path)
 			return
 		}
-		this._filesystem[url] = Date.now()
 
-		//
-		// fetch file
-		// for now only support import
-		//
-
-		let parts = url.split("/")
-		let leaf = parts[parts.length-1]
-		let path
-		if(leaf.includes(".")) {
-			// dunno what to do so just accept as is
-			path = url
-			console.log("db: loading raw url = " + path)
-		} else {
-			// for folders look for a specific hint file
-			path = `${url}/.${leaf}.lifecards.js`
-			console.log("db: loading implicit hints from = " + path)
+		// for now dots are not allowed
+		if(path.includes(".")) {
+			console.error("db::load dots are not allowed in path = " + path)
+			return
 		}
 
-		// not supported - load json and parse
-		// const response = await fetch(path)
-		// const json = await response.json()
-
 		//
-		// import real ".js" javascript files
-		// disallow crashes
-		// build a promise to attempt to fetch item
-		// returns prior to completing promise
+		// make a helper that will load things for us later
 		//
+		let helper = async (base,leaf) => {
 
-		let promise_finalize = (module) => {
-			for(let child of module.default) {
-				console.log("db: loaded item " + child.uuid)
-				this._write(child)
-			}				
+			let path = `${base}${leaf.length?"/.":""}${leaf}.lifecards.js`
+			console.log(path)
+
+			try {
+				// the hints file will have this name
+				let module = await import(path)
+				for(let blob of module.default) {
+
+					// if the blob specifies to load some markdown - fetch it now
+					try {
+						if(blob.load) {
+							console.log("db: loading raw file " + blob.uuid+"/"+blob.load)
+							let response = await fetch(blob.uuid+"/"+blob.load)
+							let text = await response.text()
+							blob.markdown = text
+						}
+					} catch(err) {
+						console.warn("db: inner load on item failed")
+					}
+
+					console.log("db: loaded item = " + blob.uuid + " " + path)
+					this._write(blob)
+				}
+			} catch(err) {
+				console.warn("DB: promise failure (probably not critical) - did not find metadata for requested uuid = " + base + " " + leaf)
+				console.warn(err)
+			}
 		}
 
-		try {
-			let promise = import(path).then(promise_finalize)
-			this._promises.push(promise)
-		} catch(e) {
-			console.warn("DB: promise failure (probably not critical) - did not find metadata for requested path " + url)
-			console.warn(e)
+		//
+		// fetch root separately from the rest simply because file system notation is idiosyncratic
+		//
+		if(!this._uuids["/"]) {
+			await helper("/","")
+			let root = this._uuids["/"]
+			if(!root) {
+				//console.error("DB: for now the file /.lifecards.js should have a root note")
+				this._uuids["/"] = {loaded:Date.now()}
+			} else {
+				root.loaded = Date.now()
+			}
 		}
 
+		//
+		// break path into fragments and pass to above helper - skipping the root
+		//
+		let parts = path.split("/").slice(1)
+		let uuid = ""
+
+		// walk down the tree to the current target
+		for(let part of parts) {
+
+			// skip empty parts...
+			if(!part.length) {
+				continue;
+			}
+
+			// focus on this node
+			uuid = uuid + "/" + part
+
+			// if a previous node exists AND it is marked as fully complete - then do not reload it
+			// todo could actually even seal branches if we wanted to save digging
+			let prev = this._uuids[uuid]
+			if(!prev) {
+				prev = this._uuids[uuid] = {loaded:Date.now()}
+			}
+			else if(prev.loaded) {
+				console.log("db: ignoring duplicate request to load uuid = " + uuid)
+				continue
+			}
+			else {
+				prev.loaded = Date.now()
+			}
+
+			await helper(uuid,part)
+
+		}
 	}
 
 	async _finalize_promises() {
@@ -440,6 +484,12 @@ export default class DatabaseFS { // extends AbstractDatabase
 
 	async _query(args=0) {
 
+		// must have observer to return results
+		if(!args.observer) {
+			console.error("DB: no observer callback handler")
+			return
+		}
+
 		// sanity check - current policy is to disallow arrays of queries as well
 		if (!args || typeof args !== 'object' || Array.isArray(args)) {
 			console.warn("DB: poorly formed query = " + args)
@@ -448,16 +498,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 
 		// the database may look for or even update hints from filesystem
 		if(args.uuid) {
-			this._load(args.uuid)
-		}
-
-		// make sure any existing work is complete (especially filesystem loads)
-		await this._finalize_promises()
-
-		// must have observer to return results
-		if(!args.observer) {
-			console.error("DB: no observer callback handler")
-			return
+			await this._load(args.uuid)
 		}
 
 		//

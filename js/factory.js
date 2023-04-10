@@ -3,7 +3,6 @@ import area from "./area.js"
 import base from "./base.js"
 import card from "./card.js"
 import link from "./link.js"
-import site from "./site.js"
 import nav from "./nav.js"
 import logo from "./logo.js"
 import footer from "./footer.js"
@@ -15,7 +14,6 @@ let classes = {
 	area,
 	card,
 	link,
-	site,
 	nav,
 	logo,
 	footer,

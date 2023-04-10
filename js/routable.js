@@ -18,8 +18,6 @@ let router = new Router()
 export default class Routable extends HTMLElement {
 
 	resolve(blob) {
-		if(this.db) return
-		this.db = blob.db
 		this.default = blob.default || null
 		router.observe( this.route.bind(this) )
 	}
@@ -29,11 +27,6 @@ export default class Routable extends HTMLElement {
 		let path = e.uuid
 		if(!path) {
 			console.error("routable: has no path")
-			return
-		}
-
-		if(!this.db) {
-			console.error("routable: has no db")
 			return
 		}
 
@@ -53,9 +46,6 @@ export default class Routable extends HTMLElement {
 
 			// detach any children
 			this.innerHTML = ""
-
-			// stuff database into blob to be helpful
-			blob.db = this.db
 
 			// already built?
 			if(!this._routable_elements) this._routable_elements={}
@@ -87,7 +77,9 @@ export default class Routable extends HTMLElement {
 			}
 		}
 
-		this.db.resolve({command:"query",data:{uuid:path,observer}});
+		if( window._dom_db_handle ) {
+			window._dom_db_handle.resolve({command:"query",data:{uuid:path,observer}});
+		}
 	}
 }
 
@@ -95,7 +87,7 @@ customElements.define('lifecards-routable', Routable )
 
 
 
-
+/* it is not really necessary to precondition this element
 var s = document.createElement('style');
 s.innerHTML =
 `
@@ -106,10 +98,7 @@ lifecards-routable {
 }
 `
 document.head.appendChild(s);
-
-
-
-
+*/
 
 
 
