@@ -186,7 +186,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 			return
 		}
 
-		console.log("db::write writing " + blob.uuid)
+		//console.log("db::write writing " + blob.uuid)
 
 		//
 		// look and see if is this a new object or a change to an existing object?
@@ -363,7 +363,6 @@ export default class DatabaseFS { // extends AbstractDatabase
 	///
 	/// todo later support https:// urls
 	///
-	/// this routine adds a promise to _promises if it is doing work
 	///
 
 	async _load(path) {
@@ -407,7 +406,7 @@ export default class DatabaseFS { // extends AbstractDatabase
 						console.warn("db: inner load on item failed")
 					}
 
-					console.log("db: loaded item = " + blob.uuid + " " + path)
+					//console.log("db: loaded item = " + blob.uuid + " " + path)
 					this._write(blob)
 				}
 			} catch(err) {
@@ -466,18 +465,6 @@ export default class DatabaseFS { // extends AbstractDatabase
 		}
 	}
 
-	async _finalize_promises() {
-		while(this._promises.length) {
-			try {
-				let promise = this._promises.shift()
-				await(promise)
-			} catch(err) {
-				console.warn("DB: promise failure (probably not critical)")
-				console.warn(err)
-			}
-		}
-	}
-
 	//
 	// query always returns a copy of an item
 	//
@@ -498,7 +485,12 @@ export default class DatabaseFS { // extends AbstractDatabase
 
 		// the database may look for or even update hints from filesystem
 		if(args.uuid) {
-			await this._load(args.uuid)
+			try {
+				await this._load(args.uuid)
+			} catch (err) {
+				// hmm, should have been caught before here...
+				console.error(err)
+			}
 		}
 
 		//

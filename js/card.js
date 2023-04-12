@@ -12,14 +12,35 @@ let counter = 100
 
 export default class Card extends HTMLElement {
 
-	resolve(blob) {
+	async resolve(blob) {
 
 		let label = blob.uuid.split("/").slice(-1) + "";
 		label = label.charAt(0).toUpperCase()+label.slice(1)
 		let href = blob.href || blob.link || blob.uuid || "#"
 		let text = blob.text || blob.content || ""
-		let sponsor = blob.sponsor || ""
-		let art = blob.art || `https://source.unsplash.com/random/${counter++}`
+
+		let art = {
+			image : (blob.art && blob.art.length ? blob.art : null),
+			alt : "",
+			descr : "",
+			creator : blob.sponsor || "",
+			creator_url : blob.sponsor_url || ""
+		}
+
+		if(!art.image) {
+			try {
+				let response = await fetch("https://api.unsplash.com/photos/random?client_id=1M43c1xXx1JR0-XN0-jL5obaQ-CwWNUB0dkHHegUQKQ")
+				let json = await response.json()
+				art.image = json.urls.small
+				art.descr = json.description
+				art.alt = json.alt_description
+				art.creator = json.user.username // username, twitter_username, portfolio_url
+				art.creator_url = "https://unsplash.com/@"+json.user.username // username, twitter_username, portfolio_url
+			} catch(err) {
+				art.image = "/assets/bird.jpg"
+				console.log("using default")
+			}
+		}
 
 		let tags = ""
 		if(blob.tags) {
@@ -31,9 +52,10 @@ export default class Card extends HTMLElement {
 		this.innerHTML =
 			`
 			<lifecards-banner>
-				<a href="${href}"><img src='${art}'></img></a>
+				<a href="${href}"><img src='${art.image}'></img></a>
 				<tags>${tags}</tags>
 			</lifecards-banner>
+			<a style="text-align:right;padding-right:8px" href="${art.creator_url}">${art.creator}</a>
 			<label>${label}</label>
 			<phrase>${text}</phrase>
 			`
@@ -122,7 +144,7 @@ lifecards-card img {
 
 lifecards-card label {
 	display:block;
-	max-height: 20px;
+	max-height: 32px;
 	font-size: 1.05em;
 	letter-spacing: 0.1rem;
 	margin: 8px 0 0 8px;
@@ -131,7 +153,6 @@ lifecards-card label {
 
 lifecards-card phrase {
 	display:block;
-	max-height: 20px;
 	overflow: none;
 	margin: 0 0 8px 8px;
 	padding: 8px 0 8px 0;
