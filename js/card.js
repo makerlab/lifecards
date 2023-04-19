@@ -45,7 +45,7 @@ export default class Card extends HTMLElement {
 		let tags = ""
 		if(blob.tags) {
 			for(let tag of blob.tags) {
-				tags = tags + `<tag><a href="/tag">${tag}</a></tag>`
+				tags = tags + `<tag><a href="/q?tag=${tag}">${tag}</a></tag>`
 			}
 		}
 
@@ -53,9 +53,11 @@ export default class Card extends HTMLElement {
 			`
 			<lifecards-banner>
 				<a href="${href}"><img src='${art.image}'></img></a>
-				<tags>${tags}</tags>
+				<tags>
+					${tags}
+					<a style="text-align:right;padding-right:8px" href="${art.creator_url}">${art.creator}</a>
+				</tags>
 			</lifecards-banner>
-			<a style="text-align:right;padding-right:8px" href="${art.creator_url}">${art.creator}</a>
 			<label>${label}</label>
 			<phrase>${text}</phrase>
 			`

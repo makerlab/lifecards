@@ -75,7 +75,6 @@ export default class DatabaseFS { // extends AbstractDatabase
 		this._tags = {}
 		this._counters = {}
 		this._observers = {}
-		this._filesystem = {}
 	}
 
 	///
@@ -392,7 +391,17 @@ export default class DatabaseFS { // extends AbstractDatabase
 			try {
 				// the hints file will have this name
 				let module = await import(path)
-				for(let blob of module.default) {
+
+				let data = module.default
+
+				// handle singletons
+				if (typeof data === 'object') data = [data]
+
+				// visit items
+				for(let blob of data) {
+
+					// mark as having been loaded at least once
+					blob.loaded = Date.now()
 
 					// if the blob specifies to load some markdown - fetch it now
 					try {
@@ -422,10 +431,9 @@ export default class DatabaseFS { // extends AbstractDatabase
 			await helper("/","")
 			let root = this._uuids["/"]
 			if(!root) {
-				//console.error("DB: for now the file /.lifecards.js should have a root note")
-				this._uuids["/"] = {loaded:Date.now()}
-			} else {
-				root.loaded = Date.now()
+				// todo is this really needed? i don't think so
+				console.error("DB: for now the file /.lifecards.js should have a root note")
+				this._uuids["/"] = {uuid:"/",loaded:Date.now()}
 			}
 		}
 
@@ -446,21 +454,21 @@ export default class DatabaseFS { // extends AbstractDatabase
 			// focus on this node
 			uuid = uuid + "/" + part
 
-			// if a previous node exists AND it is marked as fully complete - then do not reload it
-			// todo could actually even seal branches if we wanted to save digging
-			let prev = this._uuids[uuid]
-			if(!prev) {
-				prev = this._uuids[uuid] = {loaded:Date.now()}
-			}
-			else if(prev.loaded) {
+			// don't busy reload
+			let node = this._uuids[uuid]
+			if(node && node.loaded) {
 				console.log("db: ignoring duplicate request to load uuid = " + uuid)
 				continue
 			}
-			else {
-				prev.loaded = Date.now()
-			}
 
+			// load if needed
 			await helper(uuid,part)
+
+			// for now mark failures - i need to do this to avoid returning them in results lists
+			node = this._uuids[uuid]
+			if(!node) {
+					this._uuids[uuid] = {uuid,loaded:"incomplete"}
+			}
 
 		}
 	}
@@ -498,13 +506,14 @@ export default class DatabaseFS { // extends AbstractDatabase
 		// skip any other search qualities for now
 		// ignores offset and limit
 		// returns one [item] as an array with one item in it
+		// todo the way of avoiding incomplete nodes is kind of hacky
 		//
 
 		let results = []
 
 		if(args.uuid) {
 			let blob = this._uuids[args.uuid]
-			if(blob) {
+			if(blob && blob.loaded != "incomplete") {
 				results.push({...blob})
 			}
 		}
@@ -552,6 +561,9 @@ export default class DatabaseFS { // extends AbstractDatabase
 			}
 
 			for(let blob of this._data) {
+
+				// ignore bad loads
+				if(blob.loaded == "incomplete") continue
 
 				// test matching criteria
 				if(!matches(blob)) continue
