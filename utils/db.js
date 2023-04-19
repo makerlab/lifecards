@@ -389,13 +389,27 @@ export default class DatabaseFS { // extends AbstractDatabase
 			console.log(path)
 
 			try {
+
 				// the hints file will have this name
 				let module = await import(path)
 
 				let data = module.default
 
-				// handle singletons
-				if (typeof data === 'object') data = [data]
+				// anything?
+				if(!data) {
+					console.error("db: no data in file " + path)
+					return
+				}
+
+				// array or single item?
+				if(!Array.isArray(data)) {
+					if(typeof data === 'object') {
+						data = [data]
+					} else {
+						console.error("db: unknown data in file " + path)
+						return
+					}
+				}
 
 				// visit items
 				for(let blob of data) {
