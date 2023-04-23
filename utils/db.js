@@ -414,9 +414,6 @@ export default class DatabaseFS { // extends AbstractDatabase
 				// visit items
 				for(let blob of data) {
 
-					// mark as having been loaded at least once
-					blob.loaded = Date.now()
-
 					// if the blob specifies to load some markdown - fetch it now
 					try {
 						if(blob.load) {
@@ -482,6 +479,11 @@ export default class DatabaseFS { // extends AbstractDatabase
 			node = this._uuids[uuid]
 			if(!node) {
 					this._uuids[uuid] = {uuid,loaded:"incomplete"}
+			}
+
+			// mark only the explicitly requested item as fully loaded
+			if(node) {
+				node.loaded = Date.now()
 			}
 
 		}
