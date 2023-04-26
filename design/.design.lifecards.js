@@ -157,13 +157,13 @@ To start, modify the content in <code>/data/data.js</code>. Lifecards is data-dr
 
 ## Bootstrapping for more serious developers
 
-The <code>index.html</code> file demonstrates how to bootstrap Lifecards. You can also do this yourself and embed the project in other tools. Bootstrapping requires first making a DB() database and then making a DOM() layout manager. The DOM() layout manager is driven by telling it what to make. Many of the DOM nodes are able to query the database to fetch and produce yet other nodes and to thus produce the display.
+The <code>index.html</code> file demonstrates how to bootstrap Lifecards. You can also do this yourself and embed the project in other tools. Bootstrapping requires first making a database and then making a DOM() layout manager. The DOM() layout manager is driven by telling it what to make. Many of the DOM nodes are able to query the database to fetch and produce yet other nodes and, thus, to produce the display.
 
 ## Node structure
 
 Lifecards consumes a directed acyclic graph of "nodes" that are specified in the database. A node is really just a json blob with some conventions about what is in it. Typically a database is actually just a file system or an unstructured datastore such as MongoDB or Firebase.
 
-Nodes crumple or squish together both the concept of "being data" (holding important values) and "being presentation" (holding values related to presentation). By "crumple" or "squish" it is meant that the node namespace is "as flat as possible" (this is a design maxim) but this *also* means that there can conceivably be collisions between concepts in the data space and concepts in the presentation space.
+Nodes crumple or squish together both the concept of "being data" (holding important values) and "being presentation" (holding values related to presentation). By "crumple" or "squish" it is meant that the node namespace is "as flat as possible" (this is a design maxim) but this *also* means that collisions between concepts in the data space and concepts in the presentation space can occur.
 
 Typical nodes look like this:
 
@@ -172,7 +172,6 @@ Typical nodes look like this:
 		label:"Comics!",
 		art:"/assets/bird.jpg",
 		query:"*",
-
 		kind:"area",
 		thumb:"/assets/.thumb.bird.jpg"
 		content:"Best Comics Ever",
@@ -183,28 +182,28 @@ Typical nodes look like this:
 		}
 	}
 
-Here we see two disjoint domains crumpled together: The first few tokens (uuid, age ...) are "data". They refer to concepts that are important to you in a durable, presentation-independent sense. The latter tokens refer to presentational or layout concerns.
+Here we see two disjoint domains crumpled together: The first few tokens (uuid, age ...) are "data". They refer to concepts that might be important to you in a durable, presentation-independent sense. The latter tokens refer to presentational or layout concerns.
 
-Because Lifecards is data-driven one can reasonably expect to be able to view this item by itself. Items can be viewed by themselves (often) directly, but ALSO will often show up in a parent (as a result of a parent query).
+Because Lifecards is data-driven, one can reasonably expect to be able to view this node by itself. Nodes can be viewed by themselves (often) directly, but ALSO can show up in a parent (as a result of a parent query).
 
-If the item is being viewed by itself then the "kind" of presentation widget that will be used in this above example is called an "area" widget. That actual layout mechanic and actual code is located in /js/area.js . Note that many widgets are more or less empty because there is a powerful base class that enhances ALL html dom elements with features here. "Kind" translates directly to a widget if any, otherwise an ordinary HTML dom type is manufactured - if kind was "div" for example a "div" is manufactured as the container.
+If the item is being viewed by itself, then the "kind" of presentation widget that will be used in this above example is called an "area" widget. That actual layout mechanic and actual code is located in <code>/js/area.js</code>. Note that many widgets are more or less empty because the HTML DOM contains a powerful base class that enhances ALL elements with features here. "Kind" translates directly to a widget if any, otherwise an ordinary HTML DOM type is manufactured - if kind was "div" for example, a "div" is manufactured as the container.
 
-If a leaf node is not meant to be shown by itself then it's not really important to specify the "kind" of layout style that it has because the parent scope will often coerce the rendering style (plucking out what hints it can from the child node and painting those however it wishes).
+Specifying a "kind", or layout style, is less important for leaf or child nodes because our node's parent scope can coerce its rendering style (plucking out what hints it can from the child node and painting those however it wishes).
 
 Every node in that graph that is handed to the DOM is treated as potentially renderable. Only nodes that are handed to the DOM end up being rendered.
 
-There are some design choices that we've made in the internal structure of data:
+Some design choices that we've made in the internal structure of data:
 
-- data objects uuids should avoid collisions world wide
-- it is best for each project have its own dns domain
-- database is conceptually a directed acyclic graph
+- Data objects' UUIDs should avoid collisions world wide.
+- Each project should have its own DNS domain.
+- A database is conceptually a directed acyclic graph.
 - we are planning on implementing a variety of scanners and bridges from other data storage systems aside from the filesystem
 
-## Vanilla DOM Components: div, P, h1, h2, h3 and so on
+## Vanilla DOM Components: <i>div, P, h1, h2, h3</i> and so on
 
 A node that is a display widget is conceptually referred to as a 'component'.
 
-A node or component can have a "kind" field and if specified that specific item is produced. It is therefore possible to compose fairly ordinary HTML with a fairly wide range of approaches in a data-driven way with Lifecards if desired:
+One can use the names of built-in HTML DOM elements to create components with said elements' properties. It is therefore possible to compose fairly ordinary HTML with a wide range of approaches in a data-driven way with Lifecards if desired:
 
 	{
 		kind:"div",
@@ -225,54 +224,54 @@ Area will support pagination [TBD]
 
 ## Base Component
 
-Base is a powerful base node type that has its resolve() method injected into every other node giving those other nodes a core set of powers.  It gives nodes the ability to resolve fields including content, stylize, query and children.
+<code>kind: "base"</code> is a powerful node type that has its resolve() method injected into every other node, giving other nodes a core set of powers.  It gives nodes the ability to resolve fields including content, stylize, query and children.
 
 ## Card Component
 
-Card is the first step towards generalized card layout capabilities. It is currently capable of presenting one card style. [TBD]
+<code>kind: "card"</code> is the first step towards generalized card layout capabilities. It is currently capable of presenting one card style. [TBD]
 
 ## Link Component
 
-Link is a shim around the vanilla dom 'a href' element. The issue was that we didn't want to overload "a" and we wanted to standardize property field setting a bit. There's some argument that it could be removed but it's still present for now. [TBD]
+<code>kind: "link"</code> is a shim around the vanilla DOM <code>a href</code> element. The issue was that we didn't want to overload <code>a</code> and we wanted to standardize property field setting a bit. There's some argument that it could be removed but it's still present for now. [TBD]
 
 ## Logo Component
 
-Logo is the first of a series of very rich artful effects. Lifecards as a whole is intended to be fun, light and pretty, not just a dry serious tool. Many 3D elements will be written as well [TBD].
+<code>kind: "logo"</code> is the first in a series of very rich, artful CSS text styling effects for Lifecards. Lifecards as a whole is intended to be fun, light and pretty, not just a dry, serious tool. Many 3D elements will be written as well [TBD].
 
 ## Footer Component
 
-Footer wraps up footer related concerns; mostly a @media day night sensitive footer region. While this could easily be a vanilla DOM element it felt like it was worth promoting to be a full blown concept by itself.
+<code>kind: "footer"</code> wraps up footer-related concerns; mostly a <code>@media</code> day/night-sensitive footer region. While this could easily be a vanilla DOM element, it felt worth promoting to full-blown concept status.
 
 ## Nav Component
 
-Nav provides a basic navigation bar. Semantically the design intent is that this is a palette or toolbar for applications that shows up on every page. It will highlight the current page if the current page is an URL in the navbar [TBD].
+<code>kind: "nav"</code> provides a basic navigation bar that remains consistent across every page. Semantically, it is intended as a palette or an app toolbar. If the current page is a URL in the navbar, it will highlight the current page [TBD].
 
 ## Routable Component
 
-Routable shows whatever the URL is set to. This is a way to have multiple pages in a SPA (single page application).
+<code>kind: "routable"</code> displays whatever the URL is set to. This is a way to create multiple pages in a SPA (single page application).
 
-Lifecards ALWAYS intercepts ALL local URLS. This may need to be more flexible eventually [TBD].
+Lifecards ALWAYS intercepts ALL local URLs. This may need to be more flexible eventually [TBD].
 
 # Theory
 ---
 
-This is a very quick primer on some of the concerns that people will have around taking "data" and presenting it.
+This is a very quick primer on some of the concerns around taking "data" and presenting it.
 
 ## Data Import / Organization
 
-The current version uses simple json files that hold all data. The intent, however, is to have hooks for richer import sources. There is definitely a plan to include scanners and database bindings (later) [TBD]. In general, you'll need some kind of adapter that bridges your data to the Lifecards system. Data is always going to exist in multiple places.
+The current version uses simple .json files that hold all data. The intent, however, is to have hooks for richer import sources. There is definitely a plan to include scanners and database bindings (later) [TBD]. In general, you'll need some kind of adapter that bridges your data to the Lifecards system. Data is always going to exist in multiple places.
 
-Your goal (in general) is to have a 'source of truth' or a canonical place for data. This includes heavy data (text, images, content) and a lighter metadata (creation date, author, tags). Often a database or a lookaside file near the content itself will store the metadata. Often vanilla filesystems are used for heavy assets - or industrial strength data stores. In most cases the storage system allows decoration of files with metadata.
+Your goal (in general) is to have a 'source of truth' or a canonical place for data. This includes heavy data (text, images, content) and its lighter associated metadata (creation date, author, tags). A database or a lookaside file near the content itself will store the metadata, on occasion. Often vanilla filesystems are used for heavy assets - or industrial strength data stores. In most cases, the storage system allows use of metadata for decoration of files.
 
-For heavy assets typically I recommend trying to create some kind of directed acyclic graph on disk - basically files and folders and using that as an overarching filing system. I recommend fairly soft and loose folder names such as "text", "travel" and so on. It is tricky finding general labels, but risky to be overly specific at this level. It's also less important that these be extremely accurate, and more important that every asset has one resting place. I've personally had a tendency to categorize data into year bucket folders but mileage may vary.
+For heavy assets, I typically recommend creating some kind of directed acyclic graph on disk -- basically files and folders -- and using that as an overarching filing system. I recommend fairly soft and loose folder names such as "text", "travel" and so on. Finding good general labels can be tricky, but over-specificity at this level is risky. It's also less important that these be extremely accurate, and more important that every asset has one resting place. I've personally had a tendency to categorize data into year bucket folders, but your mileage may vary.
 
-You'll never have a perfect organization. It is in fact not physically possible to perfectly organize data. Data is necessarily going to be mis-categorized as a fundamental side-effect of disjoint classification. There are many papers and books on categorization theory, prototype theory, and theories of partitioning that discuss these issues.
+You'll never have a perfect organization. It is in fact not physically possible to organize data perfectly. Data is necessarily going to be miscategorized as a fundamental side effect of disjoint classification. There are many papers and books on categorization theory, prototype theory, and theories of partitioning that discuss these issues.
 
 ## Presentation: Color, Style, Layout, Components
 
-Below the components we provide are lower level concerns around layout, readibility, aesthetics, usability (especially for people who are differently abled). There are tons of sites that talk about user interface considerations, fonts, kerning, spacing, color and so on. Also most low level style and component frameworks such as tailwind, bootstrap and so on have very very good and somewhat standardized opinions on these factors. It's worth browsing if you're not familiar with these resources.
+Below the components we provide are lower-level concerns around layout, readability, aesthetics, and usability (especially for people who are differently-abled). There are tons of sites devoted to user interface considerations, fonts, kerning, spacing, color and so on that you can consult as references. Also, most low-level style and component frameworks -- such as Tailwind, Bootstrap and so on -- have very, very good and somewhat standardized opinions on these factors. Their sites are worth browsing if you're not familiar with these resources.
 
-You should be able to use the current tools as-is but you can also customize if you wish. It's important to customize because reader fatigue sets in if the same patterns are visually seen over and over. Customization can be achieved by including your own css or by hand styling each of your elements, or by adding new kinds of elements even (if you're a programmer). You'll want to familiarize yourself with design theory resources if you start messing around with layout beyond what is provided. The current version DOES attempt to set a few basics:
+You should be able to use the current tools as-is, but you can also customize if you wish. It's important to customize because reader fatigue sets in if the same patterns are visually seen over and over. Customization can be achieved by including your own css or by hand styling each of your elements, or by adding new kinds of elements even (if you're a programmer). You'll want to familiarize yourself with design theory resources if you start messing around with layout beyond what is provided. The current version DOES attempt to set a few basics:
 
 - fonts and font kerning are set to be reasonable
 - spacing
