@@ -193,7 +193,7 @@ Some design choices that we've made in the internal structure of data:
 - Data objects' UUIDs should avoid collisions world wide.
 - Each project should have its own DNS domain.
 - A database is conceptually a directed acyclic graph.
-- we are planning on implementing a variety of scanners and bridges from other data storage systems aside from the filesystem
+- we are planning on implementing a variety of scanners and bridges from other data storage systems aside from the filesystem.
 
 ## Vanilla DOM Components: <i>div, P, h1, h2, h3</i> and so on
 
